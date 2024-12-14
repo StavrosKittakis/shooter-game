@@ -1,5 +1,3 @@
-#Create your own shooter
-
 from pygame import *
 from random import randint
 
@@ -9,23 +7,15 @@ missed_shots = 0
 font.init()
 font1 = font.Font(None, 50)
 font2 = font.Font(None, 100)
-"""score_txt = font1.render("Score:" + str(score), True, (255, 255, 255))
-missed = font1.render("Missed:" + str(missed), True, (255, 255, 255))"""
-
 
 window = display.set_mode((700, 500))
 display.set_caption("pygame window")
 background = transform.scale(image.load("galaxy.jpg"), (700, 500))
 
-"""mixer.init()
-mixer.music.load("space.ogg")
-mixer.music.play()"""
-
 bullets = sprite.Group()
 asteroids = sprite.Group()
 
 class SpriteCharacter(sprite.Sprite):
-
     def __init__(self, image_path, x, y, speed):
         super().__init__()
         self.image = transform.scale(image.load(image_path), (65, 65))
@@ -46,7 +36,7 @@ class Hero(SpriteCharacter):
             self.rect.x += self.speed
     
     def fire(self):
-        bullet = Bullet("bullet.png", self.rect.x, self.rect.y, 9)
+        bullet = Bullet("bullet.png", self.rect.x + 20, self.rect.y, 9)
         bullets.add(bullet)
 
 class Asteroid(SpriteCharacter):
@@ -67,20 +57,16 @@ class UFO(SpriteCharacter):
             self.rect.x = randint(0, 635)  
             self.speed = randint(2, 5)  
 
-
 class Bullet(SpriteCharacter):
     def update(self):
         self.rect.y -= self.speed
         if self.rect.y < 0:
             self.kill()
 
-
-
 enemies = sprite.Group()
 for i in range(5):
     ufo = UFO("ufo.png", randint(100, 600), 10, randint(2, 5))
     enemies.add(ufo)
-
 
 rocket = Hero("rocket.png", 350, 400, 6)
 asteroid = Asteroid("asteroid.png", randint(100, 600), 10, 3)
@@ -98,13 +84,13 @@ while game:
             if i.key == K_SPACE:
                 rocket.fire()
 
+
+
     if not game_over:
-    
         rocket.move()
-    
         window.blit(background, (0, 0))
         rocket.render(window)
-    
+
         asteroid.render(window)
         asteroid.move()
 
@@ -117,27 +103,36 @@ while game:
         collisions = sprite.groupcollide(bullets, enemies, True, True)
         as_collisions = sprite.groupcollide(bullets, asteroids, True, False)
 
-        score_txt = font1.render("Score:" + str(score), True, (255, 255, 255))
-        missed = font1.render("Missed:" + str(missed_shots), True, (255, 255, 255))
-
-        window.blit(score_txt, (10, 10))
-        window.blit(missed, (10, 40))
-
-        if missed_shots == 5:
-            game = False 
+        if sprite.collide_rect(rocket, asteroid):
+            score -= 10
+            if score < 0:
+                score = 0
 
         for p in collisions:
             score += 1
             ufo = UFO("ufo.png", randint(100, 600), 10, randint(2, 5))
             enemies.add(ufo)
 
+        score_txt = font1.render("Score:" + str(score), True, (255, 255, 255))
+        missed = font1.render("Missed:" + str(missed_shots), True, (255, 255, 255))
+        window.blit(score_txt, (10, 10))
+        window.blit(missed, (10, 40))
+
+        if missed_shots >= 5:
+            game_over = True
+        elif score >= 50:
+            game_over = True
 
     else:
-        window.blit(backgorund, (0, 0))
-        lose = font2. render("YOU LOSE", True, (255, 0, 0))
-        window.blot(lose, (100, 200))
+        window.blit(background, (0, 0))
+        if missed_shots >= 5:
+            lose = font2.render("YOU LOSE", True, (255, 0, 0))
+            window.blit(lose, (200, 200))
+        elif score >= 50:
+            win = font2.render("YOU WIN", True, (255, 255, 0))
+            window.blit(win, (200, 200))
 
-
-    
     clock.tick(FPS)
     display.update()
+
+
